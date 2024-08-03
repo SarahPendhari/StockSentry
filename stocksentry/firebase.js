@@ -1,3 +1,4 @@
+// firebase.js
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 
@@ -10,7 +11,6 @@ const firebaseConfig = {
     appId: "1:730095808356:web:126e2a5d3cbe68fe79d471",
     measurementId: "G-6QWDCR9PTJ"
   };
-  
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);

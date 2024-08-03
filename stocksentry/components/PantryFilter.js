@@ -1,22 +1,27 @@
+// src/components/PantryFilter.js
 import { useState } from 'react';
-import { TextField } from '@mui/material';
+import { Box, TextField, Paper, Typography } from '@mui/material';
 
 const PantryFilter = ({ setFilteredItems, items }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleSearch = (e) => {
-    setSearchTerm(e.target.value);
-    setFilteredItems(items.filter(item => item.name.toLowerCase().includes(e.target.value.toLowerCase())));
+    const term = e.target.value.toLowerCase();
+    setSearchTerm(term);
+    setFilteredItems(items.filter(item => item.itemName.toLowerCase().includes(term)));
   };
 
   return (
-    <TextField
-      label="Search"
-      value={searchTerm}
-      onChange={handleSearch}
-      fullWidth
-      margin="normal"
-    />
+    <Paper elevation={3} sx={{ padding: 2, margin: 2 }}>
+      <Typography variant="h6" gutterBottom>Filter Pantry Items</Typography>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <TextField
+          label="Search Items"
+          value={searchTerm}
+          onChange={handleSearch}
+        />
+      </Box>
+    </Paper>
   );
 };
 

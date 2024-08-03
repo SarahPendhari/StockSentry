@@ -1,37 +1,51 @@
-import { useState, useEffect } from 'react';
-import { db } from '../firebase';
-import { collection, query, onSnapshot } from 'firebase/firestore';
+// src/pages/index.js
+import { useState } from 'react';
+import { Container, Typography, Box, List, ListItem, ListItemText, Paper, IconButton, ListItemSecondaryAction } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import PantryForm from '../components/PantryForm';
 import PantryFilter from '../components/PantryFilter';
+import { db } from '../firebase';
+import { collection, addDoc, deleteDoc, doc } from 'firebase/firestore';
 
-export default function Home() {
+const Home = () => {
   const [items, setItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
-  const [currentId, setCurrentId] = useState(null);
 
-  useEffect(() => {
-    const q = query(collection(db, 'pantry'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const itemsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setItems(itemsData);
-      setFilteredItems(itemsData);
-    });
+  const addItem = async (item) => {
+    const docRef = await addDoc(collection(db, 'pantry'), item);
+    setItems([...items, { ...item, id: docRef.id }]);
+    setFilteredItems([...items, { ...item, id: docRef.id }]);
+  };
 
-    return () => unsubscribe();
-  }, []);
+  const deleteItem = async (id) => {
+    await deleteDoc(doc(db, 'pantry', id));
+    const updatedItems = items.filter(item => item.id !== id);
+    setItems(updatedItems);
+    setFilteredItems(updatedItems);
+  };
 
   return (
-    <div>
-      <h1>Pantry Items</h1>
+    <Container sx={{ marginTop: 4 }}>
+      <Typography variant="h4" gutterBottom>StockSentry</Typography>
+      <PantryForm addItem={addItem} />
       <PantryFilter setFilteredItems={setFilteredItems} items={items} />
-      <PantryForm currentId={currentId} setCurrentId={setCurrentId} items={items} setItems={setItems} />
-      <div>
-        {filteredItems.map(item => (
-          <div key={item.id}>
-            <span>{item.name} - {item.quantity}</span>
-          </div>
-        ))}
-      </div>
-    </div>
+      <Paper elevation={3} sx={{ padding: 2, margin: 2 }}>
+        <Typography variant="h6" gutterBottom>Pantry Items</Typography>
+        <List>
+          {filteredItems.map((item) => (
+            <ListItem key={item.id} sx={{ borderBottom: '1px solid #ddd' }}>
+              <ListItemText primary={item.itemName} secondary={`Quantity: ${item.quantity}`} />
+              <ListItemSecondaryAction>
+                <IconButton edge="end" aria-label="delete" onClick={() => deleteItem(item.id)}>
+                  <DeleteIcon />
+                </IconButton>
+              </ListItemSecondaryAction>
+            </ListItem>
+          ))}
+        </List>
+      </Paper>
+    </Container>
   );
-}
+};
+
+export default Home;
