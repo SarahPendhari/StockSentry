@@ -1,19 +1,20 @@
 // src/pages/index.js
 
 import React, { useState } from 'react';
-import { Container, Typography, Box, List, ListItem, ListItemText, Paper, IconButton, ListItemSecondaryAction } from '@mui/material';
+import { Container, Typography, Box, List, ListItem, ListItemText, Paper, IconButton, ListItemSecondaryAction, Button } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 // import WebcamCapture from '../components/WebcamCapture';
 import PantryForm from '../components/PantryForm';
 import PantryFilter from '../components/PantryFilter';
 import { db } from '../firebase';
-import { collection, addDoc, deleteDoc, doc } from 'firebase/firestore';
-import { detectGroceryItem } from '../utils/detectGrocery';
+import { collection, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import EditItemDialog from '../components/EditItemDialog';
 
 const Home = () => {
   const [items, setItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
-  const [detectionResult, setDetectionResult] = useState([]);
+  const [editItem, setEditItem] = useState(null);
 
   const addItem = async (item) => {
     const docRef = await addDoc(collection(db, 'pantry'), item);
@@ -28,23 +29,18 @@ const Home = () => {
     setFilteredItems(updatedItems);
   };
 
-  // const handleCapture = async (imageSrc) => {
-  //   try {
-  //     const detectedItems = await detectGroceryItem(imageSrc);
-  //     setDetectionResult(detectedItems);
+  const handleEditItem = (item) => {
+    setEditItem(item);
+  };
 
-  //     detectedItems.forEach(async (item) => {
-  //       await addDoc(collection(db, 'pantry'), {
-  //         item: item.class,
-  //         timestamp: new Date()
-  //       });
-  //     });
-
-  //     console.log('Detected items:', detectedItems);
-  //   } catch (error) {
-  //     console.error('Error detecting items:', error);
-  //   }
-  // };
+  const updateItem = async (updatedItem) => {
+    const itemRef = doc(db, 'pantry', updatedItem.id);
+    await updateDoc(itemRef, updatedItem);
+    const updatedItems = items.map(item => (item.id === updatedItem.id ? updatedItem : item));
+    setItems(updatedItems);
+    setFilteredItems(updatedItems);
+    setEditItem(null);
+  };
 
   return (
     <Container sx={{ marginTop: 4 }}>
@@ -59,6 +55,9 @@ const Home = () => {
             <ListItem key={item.id} sx={{ borderBottom: '1px solid #ddd' }}>
               <ListItemText primary={item.itemName} secondary={`Quantity: ${item.quantity}`} />
               <ListItemSecondaryAction>
+                <IconButton edge="end" aria-label="edit" onClick={() => handleEditItem(item)}>
+                  <EditIcon />
+                </IconButton>
                 <IconButton edge="end" aria-label="delete" onClick={() => deleteItem(item.id)}>
                   <DeleteIcon />
                 </IconButton>
@@ -67,23 +66,8 @@ const Home = () => {
           ))}
         </List>
       </Paper>
-      
-      {/* <Box sx={{ marginTop: 4 }}>
-        <Typography variant="h6" gutterBottom>Capture and Detect Grocery Items</Typography>
-        <WebcamCapture onCapture={handleCapture} />
-        {detectionResult.length > 0 && (
-          <Paper elevation={3} sx={{ padding: 2, marginTop: 2 }}>
-            <Typography variant="h6" gutterBottom>Detection Results</Typography>
-            <List>
-              {detectionResult.map((item, index) => (
-                <ListItem key={index} sx={{ borderBottom: '1px solid #ddd' }}>
-                  <ListItemText primary={`Detected item: ${item.class}`} />
-                </ListItem>
-              ))}
-            </List>
-          </Paper>
-        )}
-      </Box> */}
+
+      {editItem && <EditItemDialog item={editItem} onUpdateItem={updateItem} onClose={() => setEditItem(null)} />}
     </Container>
   );
 };

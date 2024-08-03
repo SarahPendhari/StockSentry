@@ -16,7 +16,7 @@ const PantryForm = ({ addItem }) => {
   };
 
   return (
-    <Paper elevation={3} sx={{ padding: 2, margin: 2 }}>
+    <Paper elevation={3}>
       <Typography variant="h6" gutterBottom>Add New Pantry Item</Typography>
       <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <TextField
