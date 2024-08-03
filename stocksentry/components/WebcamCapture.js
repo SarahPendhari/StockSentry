@@ -2,6 +2,7 @@
 
 import React, { useRef } from 'react';
 import Webcam from 'react-webcam';
+import { Button, Typography, Box } from '@mui/material';
 
 const WebcamCapture = ({ onCapture }) => {
   const webcamRef = useRef(null);
@@ -12,15 +13,18 @@ const WebcamCapture = ({ onCapture }) => {
   }, [webcamRef, onCapture]);
 
   return (
-    <div>
+    <Box>
       <Webcam
         audio={false}
         ref={webcamRef}
         screenshotFormat="image/jpeg"
         width="100%"
+        height="auto"
       />
-      <button onClick={capture}>Capture</button>
-    </div>
+      <Button variant="contained" color="primary" onClick={capture} sx={{ marginTop: 2 }}>
+        Capture
+      </Button>
+    </Box>
   );
 };
 
